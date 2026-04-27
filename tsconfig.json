@@ -16,5 +16,35 @@
     },
     "composite": true
   },
-  "include": ["./webapp/**/*"]
+  "include": ["./webapp/**/*"],
+  "typedocOptions": {
+    "entryPoints": [
+        "webapp/**/*.ts"
+    ],
+    "exclude": [
+        "webapp/test/**/*"
+    ],
+    "outputs": [
+      {
+        "name": "markdown",
+        "path": "./doc/markdown"
+      },
+      {
+        "name": "html",
+        "path": "./doc/html"
+      }
+    ],
+    "lang": "en",
+    "cacheBust": true,
+    "hideGenerator": true,
+    "searchInComments": true,
+    "plugin": [
+        "typedoc-plugin-coverage",
+        "typedoc-plugin-markdown",
+        "typedoc-plugin-dt-links"
+    ],
+    "coverageOutputPath": "./doc/doccoverage.svg",
+    "coverageLabel": "Documented",
+    "coverageSvgWidth": 120
+  }
 }

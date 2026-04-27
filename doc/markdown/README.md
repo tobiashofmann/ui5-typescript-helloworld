@@ -1,3 +1,7 @@
+**ui5-typescript-helloworld**
+
+***
+
 # Typedoc Example
 
 This example shows how to transform the code comments from the TypeScript files into documentation. The sample UI5 app is written in TypeScript, therefore [TypeDoc](https://typedoc.org/) is used: "TypeDoc converts comments in TypeScript's source code into HTML documentation or a JSON model."
@@ -12,7 +16,7 @@ npm install --save-dev typedoc
 
 TypeDoc allows to convert the source code comments to HTML. The documentation can be accessed by a browser and made available to other users or stakeholders of the project. Using a CI/CD pipeline, the documentation can be generated on each release and added as a GitHub/GitLab page to the repository.
 
-![Sample documentation as HTML](images/doc_home.png)
+![Sample documentation as HTML](_media/doc_home.png)
 
 ## Run TypeDoc
 
@@ -38,7 +42,7 @@ npx typedoc
 
 The output is stored in directory doc.
 
-![Sample TypeDoc folder output](images/output.png)
+![Sample TypeDoc folder output](_media/output.png)
 
 ### Plugins
 
@@ -48,7 +52,7 @@ TypeDoc can enhanced via plugins. A list of plugins is available at the [project
 
 The coverage plugin for TypeDoc shows the code documentation coverage as an SVG that can be used to display the overall documentation status of the project. The output is a SVG file that shows the coverage percentage:
 
-![TypeDoc plugin coverage sample output](images/doccoverage.svg)
+![TypeDoc plugin coverage sample output](_media/doccoverage.svg)
 
 To add the coverage plugin:
 
@@ -118,16 +122,16 @@ npm run doc
 
 The folder doc/html contains the HTML output. Opening the file index.html gives access to the documentation in a browser.
 
-![Sampee documentation as HTML](images/doc_home.png)
+![Sampee documentation as HTML](_media/doc_home.png)
 
-A nice feature of TypeDoc is that it understands classes. The method onInit in the [App.controller.ts](webapp/controller/App.controller.ts) contains no TypeDoc comments.
+A nice feature of TypeDoc is that it understands classes. The method onInit in the [App.controller.ts](controller/App.controller/README.md) contains no TypeDoc comments.
 
-![App Controller onInit method](images/AppControllerMethodonInit.png)
+![App Controller onInit method](_media/AppControllerMethodonInit.png)
 
 The generated TypeDoc documentation contains documentation for onInit:
 
-![TypeDoc documentation for onInit method](images/GeneratedDocumentationOnInit.png)
+![TypeDoc documentation for onInit method](_media/GeneratedDocumentationOnInit.png)
 
 This documentation is taken from the Controller class the App controller extends from. SAP provides the necessary onInit documentation as sap.ui.core.d.ts:
 
-![SAP documentation for onInit method from sap.ui.core.d.ts](images/SAPdocumentationForOnInit.png)
+![SAP documentation for onInit method from sap.ui.core.d.ts](_media/SAPdocumentationForOnInit.png)
