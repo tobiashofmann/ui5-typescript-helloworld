@@ -4,6 +4,7 @@
   "description": "Showcase of a TypeScript setup for developing UI5 applications",
   "author": "SAP SE",
   "license": "Apache-2.0",
+
   "scripts": {
     "build": "ui5 build --clean-dest",
     "build:opt": "ui5 build self-contained --clean-dest --all",
@@ -18,9 +19,13 @@
     "test": "npm run lint && npm run test-ui5",
     "ui5lint": "ui5lint"
   },
+  "homepage": "https://github.com/tobiashofmann/ui5-typescript-helloworld",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SAP-samples/ui5-typescript-helloworld.git"
+    "url": "https://github.com/tobiashofmann/ui5-typescript-helloworld.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tobiashofmann/ui5-typescript-helloworld/issues"
   },
   "devDependencies": {
     "@types/openui5": "1.142.0",
