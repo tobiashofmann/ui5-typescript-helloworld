@@ -1,165 +1,211 @@
-# A Small TypeScript UI5 Example App
+# Dependency Track Example
 
-[![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/ui5-typescript-helloworld)](https://api.reuse.software/info/github.com/SAP-samples/ui5-typescript-helloworld)
+[Dependency Track](https://dependencytrack.org/) is a software from [OWASP](https://owasp.org/www-project-dependency-track/). It helps to analyze SBOMs and give transparency over your software stack. Software is analyzed for security issues and helps to identify licensing issues. The software is [available on GitHub](https://github.com/DependencyTrack/dependency-track) as open source. The easiest way is to run it via Docker.
 
-**The main resource in this repository is [the detailed step-by-step guide](step-by-step.md), which explains how the TypeScript setup is created from scratch and how all the bits and pieces fit together.**
+Dependency Track supports SBOM in the CycloneDX format. Support for SPDX was removed and may come back. The npm sbom command can create a cyclonedx SBOM, but the resulting JSON is marked as invalid by Dependency Track. Therefore, this example is using a tool from CycloneDX to create the SBOM: [cyclone-node-npm](https://github.com/CycloneDX/cyclonedx-node-npm)
 
-## Description
+## Steps
 
-This app demonstrates the TypeScript setup for developing UI5 applications, including testing. The focus is on *understanding the setup* [step by step](step-by-step.md).
+The steps to analyze a project are
 
-If you are *not* here for understanding the setup, then:
-- The *fastest* way to get started with an app is using the yeoman-based [Easy-UI5 template "ts-app"](https://github.com/ui5-community/generator-ui5-ts-app).
-- In the *[custom-controls](https://github.com/SAP-samples/ui5-typescript-helloworld/tree/custom-controls)* branch, there is an example how custom controls can be developed in TypeScript within applications.
-- In the [ui5-2.0](https://github.com/SAP-samples/ui5-typescript-helloworld/tree/ui5-2.0) branch, this repository demonstrates how an application can be tested against the type definitions (and runtime) of the upcoming *UI5 2.x version*.
-- A more complete *real-life-like* application is in the [TypeScript branch of the "UI5 CAP Event App"](https://github.com/SAP-samples/ui5-cap-event-app/tree/typescript). It comes with an [explanation](https://github.com/SAP-samples/ui5-cap-event-app/blob/typescript/docs/typescript.md) of what UI5 TypeScript code usually looks like and what to consider.
-- All *general information* about UI5 application development in TypeScript and links to tutorials, videos etc. can be found at https://sap.github.io/ui5-typescript.
+1. Generate SBOM
+2. Configure user
+3. Configure Dependency Track
+4. Upload SBOM
+5. Access Dependency Track dashboard
 
+## 1. Generate SBOM
 
-## Overview of TypeScript-related Entities
-
-- The UI5 type definitions (`*.d.ts` files) are loaded as dev dependency from [npm](https://www.npmjs.com/package/@types/openui5).
-- The file [tsconfig.json](tsconfig.json) contains the configuration for the TypeScript compilation, including a reference to the UI5 `*.d.ts` files.
--  The TypeScript-to-JavaScript transpilation is done by [`ui5-tooling-transpile`](https://www.npmjs.com/package/ui5-tooling-transpile), which acts as both a build plugin (build results are stored in the `dist` folder) and middleware (the UI5 dev server transpiles the TypeScript files from `webapp` before sending it to the browser). Under the hood it uses the [Babel](https://babeljs.io/) transpiler.
-- In addition to the TypeScript compilation, there is also a conversion from the ES6 module and class syntax used in the source files to the classic UI5 module loading and class definition syntax (`sap.ui.require(...)`/`sap.ui.define(...)` and `SuperClass.extend(...)`). This conversion is also done by `ui5-tooling-transpile`, using the [babel-plugin-transform-modules-ui5](https://github.com/ui5-community/babel-plugin-transform-modules-ui5) project from the UI5 Community (initially developed by Ryan Murphy).
-
-## A Note on Testing
-
-The main differences to tests written in JavaScript relate to a) writing OPA tests and b) configuring code coverage instrumentation:
-
-The *structural* code differences to writing tests in *JavaScript* are:
-1. The **OPA Pages are simply classes extending `Opa5`, having the actions and assertions as class methods**.
-2. The **OPA Journeys do not use the `Given`/`When`/`Then` objects, but call actions and assertions directly on the Page objects**. 
-
-This simplifies the test code a lot and at the same time avoids type complications in TypeScript caused by OPA APIs not fitting a typed language. 
-All other testing code is converted from JavaScript in the same way as regular application code is (i.e. using real ECMAScript classes and modules).
-
-The *setup* difference is in the configuration to instrument code for coverage reporting: the `istanbul` library needs to be added to the Babel config of `ui5-tooling-transpile-middleware` in `ui5.yaml`.
-
-Details can be found in the later sections of [step-by-step.md](step-by-step.md).
-
-> Note: the test setup is now using the [`ui5-test-runner`](https://github.com/ArnaudBuchholz/ui5-test-runner) instead of deprecated `karma`.
-
-
-## Requirements
-
-Either [npm](https://www.npmjs.com/), [yarn](https://yarnpkg.com/), or [pnpm](https://pnpm.io/) for dependency management.
-
-## Setup
-
-1. Clone the project:
+Generate SBOM in CycloneDX format for DEV case. First run npm i to ensure the dependencies are resolved and available. Then generate the sbom.
 
 ```sh
-git clone https://github.com/SAP-samples/ui5-typescript-helloworld.git
-cd ui5-typescript-helloworld
+npm i
+npx @cyclonedx/cyclonedx-npm -o sbom_dev.json
 ```
 
-(or download from https://github.com/SAP-samples/ui5-typescript-helloworld/archive/main.zip)
+The SBOM is stored in [file](./sbom_dev.json).
 
-2. Use npm (or any other package manager) to install the dependencies:
+**Note** Creating the SBOM in CycloneDX format with npm sbom should work. However, Dependency Track rejects the SBOM as invalid.
 
 ```sh
-npm install
+npm sbom --sbom-format cyclonedx > sbom_dev.json
 ```
 
-## Run the App
+The SBOM generated by npm sbom gets rejected. Run the http sample upload_sbom.http to a project to get the error message from Dependency Track.
 
-Execute the following command to run the app locally for development in watch mode (the browser reloads the app automatically when there are changes in the source code):
+```json
+{
+  "status": 400,
+  "title": "The uploaded BOM is invalid",
+  "detail": "Unable to determine schema version from JSON"
+}
+```
+
+## 2. Configure user
+
+For the following steps, set up your Dependecy Track instance (e.g. Docker) and ensure it is up and running and you do have an (admin) user.
+
+### Create a user
+
+Ensure you do have a user in DT.
+
+![DT create a new user account](images/R/dt_create_user.png)
+
+Asssign the necessary permissons to work with DT: create a project and submist a SBOM.
+
+### Create a new team
+
+Create a new team named Fiori.
+
+![DT create a new team](images/R/dt_create_team.png)
+
+### Create API key
+
+Create a new key. This is the key used by when uploading the sbom. Store the key somewhere.
+
+Example key: odt_aiO7FIQy_FS2evDCl8uyEIMOdhFUXWjgZXhDzav4m
+
+![Create API key](images/R/dt_create_api_key.png)
+
+### Add permissions
+
+Add the needed permissions to the team. For tests purposes you might add all permissions.
+
+### Assign user to team
+
+On the user manage page, add the fiori user to team Fiori.
+
+![Assign fiori user to team Fiori](images/R/dt_add_user_to_team.png)
+
+## 3. Configure Dependency Track
+
+### SBOM format
+
+Enable support for CycloneDX SBOM format.
+
+![alt text](images/R/dt_enable_cyclonedx.png)
+
+### Analyzers
+
+Dependcy Track supports several analyzers. Active the ones you want to use. The internal one needs no special configuration. To enable Sonatype or Trivy, follow the instructions below.
+
+#### SonaType
+
+A (free) user with a valid API token is needed. As the [documentation states](https://docs.dependencytrack.org/datasources/ossindex/) an API token is required.
+
+#### Trivy
+
+To be able to use Trivy you need to set up a [local Trivy instance](https://docs.dependencytrack.org/datasources/trivy/). Instructions on [how to set up your own Trivy instance](https://trivy.dev/docs/latest/getting-started/installation/) are on the Trivy documentation site.
+
+### Vulnerabilities
+
+NVD and GitHub should be activated. An API key is needed. For [NVD, follow the instructions](https://nvd.nist.gov/developers/request-an-api-key). For GitHub, [create a personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+
+![GH PAT](images/R/gh_pat.png)
+
+## Create Dependency Track Project
+
+![DT create project wizard](images/R/dt_create_project.png)
+
+![DT project list after creating a new project](images/R/dt_project_list_new.png)
+
+![DT Project dashboard](images/R/dt_new_project_dashboard.png)
+
+### Get Object key
+
+Expand the project details. Copy the prject identifier (object identifier).
+
+![DT get object identifier](images/R/dt_get_project_id.png)
+
+## 4. Submit SBOM
+
+Uploading the SBOM to Dependency Track is done by [calling the API](https://docs.dependencytrack.org/usage/cicd/). The SBOM is provided as the payload. 
+
+```
+curl -X "PUT" "http://dtrack.example.com/api/v1/bom" \
+     -H 'Content-Type: application/json' \
+     -H 'X-Api-Key: LPojpCDSsEd4V9Zi6qCWr4KsiF3Konze' \
+     -d $'{
+  "project": "f90934f5-cb88-47ce-81cb-db06fc67d4b4",
+  "bom": "PD94bWwgdm..."
+  }'
+```
+
+Create the SBOM as shown above in step 1. (Sample sbom: [sbom_dev.json](./sbom_dev.json)).
 
 ```sh
-npm start
+npx @cyclonedx/cyclonedx-npm -o sbom_dev.json
 ```
 
-As shown in the terminal after executing this command, the app is then running on http://localhost:8080/index.html. A browser window with this URL should automatically open.
-
-## Debug the App
-
-In the browser, you can directly debug the original TypeScript code, which is supplied via sourcemaps (need to be enabled in the browser's developer console if it does not work straight away). If the browser doesn't automatically jump to the TypeScript code when setting breakpoints, use e.g. `Ctrl`/`Cmd` + `P` in Chrome to open the `*.ts` file you want to debug.
-
-## Run the Tests
-
-The tests can be executed either manually or in an automated way using [`ui5-test-runner`](https://github.com/ArnaudBuchholz/ui5-test-runner):
-
-1. *Manual execution*: use `npm start` and then execute the tests by opening the [testsuite](http://localhost:8080/test/testsuite.qunit.html) at [http://localhost:8080/test/testsuite.qunit.html](http://localhost:8080/test/testsuite.qunit.html) in your browser. You can also directly launch the [QUnit tests](http://localhost:8080/test/Test.qunit.html?testsuite=test-resources/ui5/typescript/helloworld/testsuite.qunit&test=unit/unitTests) or the [Integration tests](http://localhost:8080/test/Test.qunit.html?testsuite=test-resources/ui5/typescript/helloworld/testsuite.qunit&test=integration/opaTests) individually.
-<!-- 2. *Test-driven* development by running Karma in watch mode using `npm run karma` (which triggers the test each time a source file changes) -->
-2. *Headless testing*: launch test-runner either *without* coverage reporting using `npm run test-runner` or *with* coverage using `npm run test-runner-coverage`.
-While the tests are running, their status can be monitored at http://localhost:8081/_/progress.html
-
-> Note: when the application to test is passed using the `--url` argument (as we do it in this sample), then there is [no "watch" mode of the ui5-test-runner so far](https://github.com/ArnaudBuchholz/ui5-test-runner/issues/119), which automatically re-runs the tests when a resource changes. 
-
-## Build the App
-
-### Unoptimized (but quick)
-
-Execute the following command to build the project and get an app that can be deployed:
+Then upload the SBOM: convert the XML to Base64 and send it to the Dependency Track API server with the correct payload.
 
 ```sh
-npm run build
+npm run upload
 ```
 
-The result is placed into the `dist` folder. To start the generated package, just run
+Result
+
+```json
+Success: { token: '8b85f55d-1a9b-4d4c-81e6-22cbe2e77e12' }
+```
+
+## 5. Analyze Project in Dependency Track
+
+![DT project overview after import](images/R/dt_project_overview.png)
+
+![DT project overview](images/R/image.png)
+
+From the project dashboard it can be easily seen if any outdated projects are used or if there are any security vulnerabilities.
+
+### Outdated components
+
+The dashboard provide a convinient way to get an overview of outdated components used in the project. While this is not a security risk per se, it shows what can turn into a security risk. Updating components is also a task that can be seen as necessary. In the example below, there are 330 outdated compnents out from 720.
+
+![DT outdated components](images/R/dt_outdated_components.png)
+
+### Security vulnerabilities
+
+An important metric is the number of security vulnerabilities. It might not be as important for a development version as it is for a released, productive, shipped and used by users version. Getting the number to 0 should always be a goal.
+
+![DT security vulnerabilities](images/R/dt_security_vulnerabilities.png)
+
+Dependency Track shows details to a CVE finding and the risk score.
+
+![DT Exploit Prediction](images/R/dt_exploit_prediction.png)
+
+From the dasboard, you can explore more information about the finding, the CVE text or the dependency graph to find out how the affected project was added to your project.
+
+![DT dependency graph](images/R/dt_dependency_graph.png)
+
+## Production version
+
+A SBOM generated for the productive version helps to understand what is shipped in a release. As devDependencies are not part of the final product, it makes sense to exclude these from the SBOM. A security issue reported on a component that is not part of the final release must not be fixed. If the affected component is only part of the dev version, it only must be fixed there and the priority of fixing the dependency can be lower.
+
+### Create SBOM
+To know what is part of a release, the SBOM can be created without dev dependencies. Sample output file: [sbom_prd.json](./sbom_prd.json).
 
 ```sh
-npm run start:dist
+npx @cyclonedx/cyclonedx-npm --omit dev -o sbom_prd.json
 ```
 
-Note that `index.html` still loads the UI5 framework from the relative URL `resources/...`, which does not physically exist, but is only provided dynamically by the UI5 tooling. So for an actual deployment you should change this URL to either [the CDN](https://sdk.openui5.org/#/topic/2d3eb2f322ea4a82983c1c62a33ec4ae) or your local deployment of UI5.
+### Create project for release in Dependency Track
 
-### Optimized
+![DT project add version](images/R/dt_project_add_version.png)
 
-For an optimized self-contained build (takes longer because the UI5 resources are built, too), do:
+![DT project add version dialog](images/R/dt_add_version.png)
+
+![DT dashboard new project version](images/R/dt_dashboard_new_version.png)
+
+### Upload SBOM
+
+Upload the new SBOM to Dependency Track. Convert the SBOM to Base64 and add the new project ID to the payload.
 
 ```sh
-npm run build:opt
+npm run upload
 ```
 
-To start the generated package, again just run
+### Analyze
 
-```sh
-npm run start:dist
-```
+The productive SBOM is analyzed by Dependency Track and will show less components and vulnerabilites (0 in total).
 
-In this case, all UI5 framework resources are also available within the `dist` folder, so the folder can be deployed as-is to any static web server, without changing the bootstrap URL.<br>
-With the self-contained build, the bootstrap URL in `index.html` has already been modified to load the newly created `sap-ui-custom.js` for bootstrapping, which contains all app resources as well as all needed UI5 JavaScript resources. Most UI5 resources inside the `dist` folder are for this reason actually **not** needed to run the app. Only the non-JS-files, like translation texts and CSS files, are used and must also be deployed. (Only when for some reason JS files are missing from the optimized self-contained bundle, they are also loaded separately.)
-
-## Check the Code
-
-Do the following to run a TypeScript check:
-
-```sh
-npm run ts-typecheck
-```
-
-This checks the application code for any type errors (but will also complain in case of fundamental syntax issues which break the parsing).<br>
-
-To lint the TypeScript code, do:
-
-```sh
-npm run lint
-```
-
-## Limitations
-
-- At this time, the used eslint rules are not verified to be optimal or to be in sync with UI5 recommendations.
-- In the future there might be further improvements to how tests are written and configured.
-
-## Known Issues
-
-None.
-
-## How to Obtain Support
-
-The sample code is provided **as-is**. No support is provided.
-
-[Create an issue](https://github.com/SAP-samples/ui5-typescript-helloworld/issues) in this repository if you find a bug in the sample app code or documentation.
-
-For issues in the UI5 type definitions which are caused by the dts-generator please open [issues in the dts-generator's repository](https://github.com/SAP/ui5-typescript/issues).<br>
-
-Issues in the UI5 type definitions which are also present in the [API documentation](https://ui5.sap.com/#/api) originate from the JSDoc comments in the original OpenUI5/SAPUI5 code, so please directly open an [OpenUI5](https://github.com/SAP/openui5/issues)/SAPUI5 ticket for those.
-
-Questions can be [asked in SAP Community](https://answers.sap.com/questions/ask.html).
-
-## License
-
-Copyright (c) 2023-2025 SAP SE or an SAP affiliate company. All rights reserved.
-This project is licensed under the Apache Software License, version 2.0 except as noted otherwise in the [LICENSE](LICENSE) file.
+![DT new project result after sbom upload for production](images/R/dt_new_project_upload.png)
