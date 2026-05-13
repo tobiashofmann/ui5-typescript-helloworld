@@ -10,14 +10,14 @@
 			id="page">
 			<content>
 				<IllustratedMessage
-					title="Hello World"
+					title="Hello World App"
 					illustrationType="sapIllus-SuccessHighFive"
 					enableVerticalResponsiveness="true"
 					description="This is a UI5 TypeScript Hello World app">
 					<additionalContent>
 						<Button
 							id="helloButton"
-							text="Say Hello"
+							text="Say Hello World"
 							press="sayHello" />
 					</additionalContent>
 				</IllustratedMessage>

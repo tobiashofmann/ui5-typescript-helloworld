@@ -28,3 +28,8 @@ dist
 coverage
 report
 .nyc_output
+
+# Playwright
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

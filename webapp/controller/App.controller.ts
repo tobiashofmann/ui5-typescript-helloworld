@@ -16,6 +16,6 @@ export default class App extends Controller {
 	}
 
 	public sayHello() : void {
-		MessageBox.show("Hello World!");
+		MessageBox.show("Say Hello World App!");
 	}
 }
