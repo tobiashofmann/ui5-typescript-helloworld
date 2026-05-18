@@ -31,7 +31,9 @@ npx odata-openapi3 -p --basePath /sap/opu/odata -d metadata.xml
 
 The output is in file [metadata.openapi3](./metadata.openapi3). To display the OpenAPI file in the browser, use open-sagger-ui.
 
+```sh
 npx open-swagger-ui --open .\metadata.openapi3.json
+```
 
 ![OpenAPI YUML](images/OpenAPI_YUML.png)
 
