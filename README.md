@@ -71,3 +71,9 @@ npx nyc report --reporter=lcov --temp-dir=coverage_tests_result/ --report-dir=co
 The lcov.info file can be used to find out which lines of code are covered by the UI tests. They can be used in the IDE or in a tool like SonarQube.
 
 ![vscode lcov](images/vscode_lcov.png)
+
+The coverage results can also be displayed in the web report.
+
+![web report overview](images/web_report_overview.png)
+
+![web report for component.ts](images/web_report_component.png)
